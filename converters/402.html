@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер величин</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(145deg, #f0f4fa 0%, #e6ecf5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .app {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            box-shadow: 0 30px 50px rgba(0,20,40,0.25);
+            padding: 32px 28px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        h1 {
+            font-weight: 500;
+            font-size: 2.4rem;
+            color: #13293D;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+        .category-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0 20px;
+        }
+        .cat-btn {
+            background: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #1e3b5c;
+            box-shadow: 0 8px 16px rgba(0,32,64,0.08);
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(0,70,120,0.1);
+            flex: 1 0 auto;
+            min-width: 140px;
+        }
+        .cat-btn.active {
+            background: #13293D;
+            color: white;
+            box-shadow: 0 12px 20px rgba(0,40,70,0.3);
+            border-color: #2d4b6e;
+        }
+        .converter-panel {
+            background: #ffffffcc;
+            border-radius: 36px;
+            padding: 32px 24px;
+            margin-top: 10px;
+            border: 1px solid white;
+        }
+        .two-cols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .col {
+            flex: 1 1 200px;
+        }
+        .col label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #2b4a6b;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+        select, input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #dbe1ec;
+            border-radius: 30px;
+            font-size: 1rem;
+            background: white;
+            outline: none;
+            transition: 0.2s;
+        }
+        select:focus, input:focus {
+            border-color: #1f4b77;
+            box-shadow: 0 0 0 4px #a3c6ff;
+        }
+        .input-group {
+            margin-bottom: 22px;
+        }
+        .result-area {
+            background: #eaf1fa;
+            border-radius: 40px;
+            padding: 20px 28px;
+            margin: 16px 0 28px;
+            border: 1px solid #b9d1ec;
+        }
+        .result-label {
+            font-size: 0.9rem;
+            color: #1c3f5e;
+            font-weight: 500;
+        }
+        .result-number {
+            font-size: 2.4rem;
+            font-weight: 600;
+            color: #0b263b;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .convert-action {
+            background: #0c2b44;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            padding: 18px 28px;
+            border-radius: 60px;
+            width: 100%;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #274b6b;
+            letter-spacing: 0.5px;
+        }
+        .convert-action:hover {
+            background: #1d405e;
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body>
+<div class="app" id="app">
+    <h1>⚖️ конвертер</h1>
+    <div class="category-row" id="categoryList">
+        <button class="cat-btn active" data-cat="length">Длина</button>
+        <button class="cat-btn" data-cat="mass">Масса</button>
+        <button class="cat-btn" data-cat="area">Площадь</button>
+        <button class="cat-btn" data-cat="volume">Объём</button>
+    </div>
+
+    <div class="converter-panel" id="converterPanel">
+        <div class="two-cols">
+            <div class="col">
+                <label for="fromUnit">Исходная единица</label>
+                <select id="fromUnit"></select>
+            </div>
+            <div class="col">
+                <label for="toUnit">Конечная единица</label>
+                <select id="toUnit"></select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="inputValue">Введите значение</label>
+            <input type="number" id="inputValue" value="1" step="any" placeholder="0">
+        </div>
+
+        <div class="result-area">
+            <div class="result-label">результат</div>
+            <div class="result-number" id="outputValue">?</div>
+        </div>
+
+        <button class="convert-action" id="convertBtn">Перевести</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const db = {
+            length: {
+                m: 1,
+                ft: 3.28084,
+                in: 39.3701,
+                km: 0.001,
+                mi: 0.000621371
+            },
+            mass: {
+                kg: 1,
+                g: 1000,
+                lb: 2.20462,
+                oz: 35.274,
+                t: 0.001
+            },
+            area: {
+                sqm: 1,
+                sqft: 10.7639,
+                sqin: 1550,
+                ha: 0.0001,
+                acre: 0.000247105
+            },
+            volume: {
+                l: 1,
+                ml: 1000,
+                gal: 0.264172,
+                qt: 1.05669,
+                cup: 4.16667
+            }
+        };
+
+        const unitLabels = {
+            length: { m: 'Метр (м)', ft: 'Фут (ft)', in: 'Дюйм (in)', km: 'Километр (км)', mi: 'Миля (mi)' },
+            mass: { kg: 'Килограмм (кг)', g: 'Грамм (г)', lb: 'Фунт (lb)', oz: 'Унция (oz)', t: 'Тонна (т)' },
+            area: { sqm: 'м²', sqft: 'фут²', sqin: 'дюйм²', ha: 'Гектар', acre: 'Акр' },
+            volume: { l: 'Литр (л)', ml: 'Миллилитр (мл)', gal: 'Галлон', qt: 'Кварта', cup: 'Чашка' }
+        };
+
+        let currentCategory = 'length';
+
+        const fromSelect = document.getElementById('fromUnit');
+        const toSelect = document.getElementById('toUnit');
+        const inputField = document.getElementById('inputValue');
+        const outputSpan = document.getElementById('outputValue');
+        const convertBtn = document.getElementById('convertBtn');
+        const categoryBtns = document.querySelectorAll('.cat-btn');
+
+        function populateUnits(category) {
+            const units = Object.keys(db[category]);
+            const labels = unitLabels[category];
+
+            fromSelect.innerHTML = '';
+            toSelect.innerHTML = '';
+
+            units.forEach((unit, index) => {
+                const optionFrom = document.createElement('option');
+                optionFrom.value = unit;
+                optionFrom.textContent = labels[unit] || unit;
+                if (index === 0) optionFrom.selected = true;
+                fromSelect.appendChild(optionFrom);
+
+                const optionTo = document.createElement('option');
+                optionTo.value = unit;
+                optionTo.textContent = labels[unit] || unit;
+                if (index === 1 || (units.length > 1 && index === 1)) optionTo.selected = true;
+                toSelect.appendChild(optionTo);
+            });
+
+            if (units.length >= 2) {
+                toSelect.value = units[1];
+            } else {
+                toSelect.value = units[0];
+            }
+        }
+
+        function convert() {
+            const fromUnit = fromSelect.value;
+            const toUnit = toSelect.value;
+            let value = parseFloat(inputField.value);
+
+            if (isNaN(value)) {
+                outputSpan.textContent = '0';
+                return;
+            }
+
+            const categoryData = db[currentCategory];
+            if (!categoryData[fromUnit] || !categoryData[toUnit]) {
+                outputSpan.textContent = '?';
+                return;
+            }
+
+            const baseValue = value / categoryData[fromUnit];
+            const result = baseValue * categoryData[toUnit];
+
+            outputSpan.textContent = result.toFixed(6).replace(/\.?0+$/, '');
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            populateUnits(category);
+
+            categoryBtns.forEach(btn => {
+                const cat = btn.dataset.cat;
+                if (cat === category) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            convert();
+        }
+
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cat = e.currentTarget.dataset.cat;
+                setCategory(cat);
+            });
+        });
+
+        convertBtn.addEventListener('click', convert);
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convert();
+        });
+
+        [fromSelect, toSelect].forEach(sel => sel.addEventListener('change', convert));
+
+        setCategory('length');
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер валют</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #f2f5fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+        .converter {
+            max-width: 650px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 25px 45px -15px #1a3350;
+            padding: 32px 30px;
+        }
+        h1 {
+            font-weight: 500;
+            font-size: 2.2rem;
+            margin: 0 0 5px 0;
+            color: #0b1f33;
+            letter-spacing: -0.5px;
+        }
+        .sub {
+            color: #4d6587;
+            margin-bottom: 30px;
+            border-left: 4px solid #1e6ec5;
+            padding-left: 16px;
+            background: #f0f7ff;
+            border-radius: 0 16px 16px 0;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .flex-col {
+            flex: 1 1 200px;
+        }
+        .flex-col label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #2c3f5c;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+        select, input {
+            width: 100%;
+            padding: 16px 18px;
+            border: 2px solid #dde3ed;
+            border-radius: 30px;
+            font-size: 1rem;
+            background: white;
+            outline: none;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        select:focus, input:focus {
+            border-color: #1a5fb0;
+            box-shadow: 0 0 0 4px rgba(26,95,176,0.15);
+        }
+        .input-block {
+            margin-bottom: 20px;
+        }
+        .result-card {
+            background: #eaf0fc;
+            border-radius: 34px;
+            padding: 20px 28px;
+            margin: 25px 0 28px;
+            border: 1px solid #b9d2f0;
+        }
+        .result-label {
+            font-size: 0.9rem;
+            color: #1d3b5e;
+        }
+        .result-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #0a1d31;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .convert-btn {
+            background: #0b2d4f;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 18px 24px;
+            border-radius: 50px;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            border: 1px solid #1d4060;
+        }
+        .convert-btn:hover {
+            background: #1a3e64;
+            transform: scale(1.01);
+        }
+        .convert-btn:active {
+            background: #06203a;
+            transform: scale(0.99);
+        }
+        .footnote {
+            text-align: right;
+            font-size: 0.7rem;
+            color: #6f84a0;
+            margin-top: 18px;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="converter">
+    <h1>💱 Валютный</h1>
+    <div class="sub">Курсы ЦБ РФ от 07.03.2026</div>
+
+    <div class="flex-row">
+        <div class="flex-col">
+            <label for="fromCurrency">Исходная валюта</label>
+            <select id="fromCurrency">
+                <option value="RUB" selected>Российский рубль (RUB)</option>
+                <option value="USD">Доллар США (USD)</option>
+                <option value="EUR">Евро (EUR)</option>
+                <option value="GBP">Фунт стерлингов (GBP)</option>
+                <option value="CNY">Юань (CNY)</option>
+            </select>
+        </div>
+        <div class="flex-col">
+            <label for="toCurrency">Конечная валюта</label>
+            <select id="toCurrency">
+                <option value="RUB">Российский рубль (RUB)</option>
+                <option value="USD" selected>Доллар США (USD)</option>
+                <option value="EUR">Евро (EUR)</option>
+                <option value="GBP">Фунт стерлингов (GBP)</option>
+                <option value="CNY">Юань (CNY)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="input-block">
+        <label for="amount">Сумма</label>
+        <input type="number" id="amount" value="100" step="any" placeholder="0.00">
+    </div>
+
+    <div class="result-card">
+        <div class="result-label">Результат</div>
+        <div class="result-value" id="resultOutput">?</div>
+    </div>
+
+    <button class="convert-btn" id="convertBtn">Перевести</button>
+</div>
+
+<script>
+    (function() {
+        const exchangeRates = {
+            RUB: 1,
+
+            USD: 79.1500,
+            EUR: 91.8391,
+            GBP: 105.4515,
+            CNY: 11.4368,
+
+            KZT: 16.0431 / 100,
+            TRY: 18.0079 / 10,
+            CHF: 101.2278,
+            JPY: 50.2859 / 100,
+            UAH: 18.0679 / 10,
+            BYN: 27.0515,
+        };
+
+        const fromSelect = document.getElementById('fromCurrency');
+        const toSelect = document.getElementById('toCurrency');
+        const amountInput = document.getElementById('amount');
+        const resultSpan = document.getElementById('resultOutput');
+        const convertButton = document.getElementById('convertBtn');
+
+        function convertCurrency() {
+            const fromVal = fromSelect.value;
+            const toVal = toSelect.value;
+            let amount = parseFloat(amountInput.value);
+
+            if (isNaN(amount)) {
+                resultSpan.textContent = '0';
+                return;
+            }
+
+            const fromRate = exchangeRates[fromVal];
+            const toRate = exchangeRates[toVal];
+
+            if (fromRate === undefined || toRate === undefined) {
+                resultSpan.textContent = 'ошибка курса';
+                return;
+            }
+
+            const amountInRUB = amount * fromRate;
+            const result = amountInRUB / toRate;
+
+            resultSpan.textContent = result.toFixed(4).replace(/\.?0+$/, '');
+        }
+
+        convertButton.addEventListener('click', convertCurrency);
+        amountInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') convertCurrency();
+        });
+        fromSelect.addEventListener('change', convertCurrency);
+        toSelect.addEventListener('change', convertCurrency);
+
+        convertCurrency();
+    })();
+</script>
+</body>
+</html>
