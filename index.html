@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>js-projects · Портфолио</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(145deg, #f0f4fa 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #1e293b;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #0f2b3d, #1e4a76);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            color: #475569;
+            font-size: 1.05rem;
+            margin-bottom: 40px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 14px;
+        }
+        h2 {
+            margin: 35px 0 18px;
+            font-size: 1.4rem;
+            color: #0f172a;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-decoration: none;
+            color: #0f172a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+            border-color: #3b82f6;
+        }
+        .card .emoji { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+        .card .title { font-weight: 600; font-size: 1.05rem; margin-bottom: 4px; }
+        .card .desc { font-size: 0.85rem; color: #64748b; }
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+        footer a { color: #3b82f6; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Портфолио · js-projects</h1>
+    <p class="subtitle">15 проектов на чистом JavaScript: игры, конвертеры, приложения. Без фреймворков.</p>
+
+    <h2>🎮 Игры</h2>
+    <div class="grid">
+        <a class="card" href="games/303.html"><span class="emoji">✂️</span><div class="title">Камень-ножницы-бумага</div><div class="desc">Игра против компьютера</div></a>
+        <a class="card" href="games/307.html"><span class="emoji">🪢</span><div class="title">Виселица</div><div class="desc">Canvas, IndexedDB, 3 категории слов</div></a>
+        <a class="card" href="games/309.html"><span class="emoji">🚢</span><div class="title">Морской бой</div><div class="desc">Таймер, localStorage, сетка 10×10</div></a>
+        <a class="card" href="games/401.html"><span class="emoji">⭕</span><div class="title">5 в ряд</div><div class="desc">Сетка 15×15, сохранение партии</div></a>
+        <a class="card" href="games/501.html"><span class="emoji">🃏</span><div class="title">Найди пару</div><div class="desc">Таймер, memory game</div></a>
+        <a class="card" href="games/503.html"><span class="emoji">🐍</span><div class="title">Змейка</div><div class="desc">Canvas, игровой цикл, коллизии</div></a>
+    </div>
+
+    <h2>🔢 Конвертеры</h2>
+    <div class="grid">
+        <a class="card" href="converters/304.html"><span class="emoji">📏</span><div class="title">Конвертер длины</div><div class="desc">Метры, футы, дюймы, км, мили</div></a>
+        <a class="card" href="converters/402.html"><span class="emoji">⚖️</span><div class="title">Конвертер величин</div><div class="desc">Длина, масса, площадь, объём</div></a>
+        <a class="card" href="converters/502.html"><span class="emoji">💱</span><div class="title">Конвертер валют</div><div class="desc">Курсы ЦБ РФ</div></a>
+    </div>
+
+    <h2>📱 Приложения</h2>
+    <div class="grid">
+        <a class="card" href="apps/306_403.html"><span class="emoji">🍳</span><div class="title">Кулинарная книга</div><div class="desc">101 рецепт, поиск по ингредиентам</div></a>
+        <a class="card" href="apps/308_404.html"><span class="emoji">✅</span><div class="title">Список дел</div><div class="desc">Работа с датами, CRUD</div></a>
+        <a class="card" href="apps/310_405.html"><span class="emoji">📜</span><div class="title">Фактотека</div><div class="desc">4 категории фактов</div></a>
+        <a class="card" href="apps/311_406.html"><span class="emoji">🔍</span><div class="title">Фактотека + фильтры</div><div class="desc">Сортировка, 5 категорий фильтров</div></a>
+    </div>
+
+    <h2>🎬 Медиа</h2>
+    <div class="grid">
+        <a class="card" href="media/302.html"><span class="emoji">📺</span><div class="title">Видеоплеер</div><div class="desc">События video, промисы</div></a>
+        <a class="card" href="media/305.html"><span class="emoji">💬</span><div class="title">Генератор цитат</div><div class="desc">Большая база, шаблоны</div></a>
+    </div>
+
+    <footer>
+        Сделано на чистом JavaScript · <a href="https://github.com/твой-username">GitHub</a>
+    </footer>
+</div>
+</body>
+</html>
