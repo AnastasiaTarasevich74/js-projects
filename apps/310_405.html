@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Факты</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f5f7fc 0%, #e9eef4 100%);
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.5rem;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.4);
+            border-radius: 2.5rem;
+            backdrop-filter: blur(1px);
+            padding: 1.5rem 2rem 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1A2A3F, #2C5368);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            color: #3a546d;
+            font-weight: 500;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .topic-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+            border-bottom: 2px solid rgba(59,130,246,0.2);
+            padding-bottom: 0.75rem;
+        }
+        .topic-btn {
+            background: transparent;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 60px;
+            cursor: pointer;
+            color: #2c3e50;
+            background: #ffffffcc;
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+            font-family: inherit;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .topic-btn:hover {
+            background: #eef2ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+        }
+        .topic-btn.active {
+            background: #1e3a8a;
+            color: white;
+            box-shadow: 0 8px 18px rgba(30,58,138,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .facts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .fact-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 1.5rem 1.3rem;
+            box-shadow: 0 12px 28px -8px rgba(0,0,0,0.08);
+            transition: all 0.25s;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            position: relative;
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            cursor: default;
+        }
+        .fact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 24px 38px -12px rgba(0,0,0,0.2);
+            border-color: #cbd5e1;
+            background: #fefefe;
+        }
+
+        .fact-icon {
+            font-size: 2rem;
+            min-width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #eff6ff, #e0e7ff);
+            border-radius: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 1px white, 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .fact-text {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.45;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .fact-card::before {
+            content: "“";
+            position: absolute;
+            bottom: 12px;
+            right: 18px;
+            font-size: 3.5rem;
+            opacity: 0.1;
+            font-family: serif;
+            pointer-events: none;
+        }
+
+        .counter-info {
+            margin: 1.5rem 0 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: #fff6e5;
+            display: inline-block;
+            padding: 0.3rem 1.2rem;
+            border-radius: 40px;
+            color: #b45309;
+            background: #ffedd5;
+        }
+
+        footer {
+            margin-top: 2.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #5b6e8c;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 1.5rem;
+        }
+
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .app-container { padding: 1rem; }
+            .topic-btn { padding: 0.5rem 1.2rem; font-size: 0.9rem; }
+            .facts-grid { grid-template-columns: 1fr; }
+        }
+
+        .fact-card {
+            animation: fadeSlideUp 0.3s ease backwards;
+        }
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <h1>📜 Фактотека &nbsp;✦</h1>
+    </div>
+
+    <div class="topic-menu" id="topicMenu">
+    </div>
+
+    <div class="counter-info" id="factCounter">📚 загружено фактов: --</div>
+
+    <div id="factsContainer" class="facts-grid">
+        <div style="text-align:center; padding:2rem;">Загрузка фактов...</div>
+    </div>
+</div>
+
+<script>
+    const factsDatabase = {
+        cosmos: {
+            name: "🌌 Космос",
+            facts: [
+                "Космическое пространство не полностью пустое — в каждом кубическом сантиметре содержится несколько атомов водорода.",
+                "Один день на Венере длится дольше, чем один год на Венере (243 земных дня против 225).",
+                "Нейтронные звёзды настолько плотны, что чайная ложка их вещества весила бы миллиарды тонн.",
+                "Самый большой известный вулкан в Солнечной системе — Олимп на Марсе, почти в 3 раза выше Эвереста.",
+                "На МКС астронавты видят 16 рассветов и закатов за сутки.",
+                "Космический телескоп Джеймса Уэбба может видеть инфракрасный свет от первых галактик.",
+                "Если два куска металла одинакового состава соприкоснутся в вакууме, они свариваются — эффект холодной сварки.",
+                "Спутник Юпитера Европа под ледяной корой скрывает океан, воды в котором больше, чем на Земле.",
+                "Чёрная дыра в центре Млечного Пути называется Стрелец A* и имеет массу 4 млн солнц.",
+                "Звезда Бетельгейзе настолько огромна, что если поместить её в центр Солнечной системы, она поглотит Юпитер.",
+                "Астронавты вырастают на 3–5 см в космосе из-за отсутствия гравитации, сжимающей позвоночник.",
+                "Солнце теряет около 4 миллионов тонн массы каждую секунду из-за ядерного синтеза.",
+                "На Титане, спутнике Сатурна, идут дожди из жидкого метана, и есть реки и озёра.",
+                "Гамма-всплески — самые мощные взрывы во Вселенной после Большого взрыва.",
+                "Млечный Путь и галактика Андромеды столкнутся через ~4,5 млрд лет.",
+                "Космический запах — астронавты описывают его как жареный стейк или горячий металл.",
+                "Экзопланета WASP-12b имеет форму яйца из-за приливных сил своей звезды.",
+                "На Луне есть застывшие лавовые трубы, достаточно большие, чтобы вместить город.",
+                "Созвездие Ориона видно почти из любой точки мира и содержит туманности.",
+                "Зонд «Вояджер-1» уже вышел в межзвёздное пространство и несёт золотую пластинку с записями Земли."
+            ]
+        },
+        animals: {
+            name: "🐾 Животный мир",
+            facts: [
+                "Осьминоги имеют три сердца, а их кровь синего цвета из-за гемоцианина.",
+                "Слоны — единственные млекопитающие, которые не умеют прыгать, зато отлично плавают.",
+                "У жирафов такое же количество шейных позвонков, как у человека — 7, но каждый длиной до 25 см.",
+                "Колибри — единственные птицы, способные летать назад.",
+                "У кошек около 100 различных звуков, тогда как у собак — всего 10.",
+                "Дельфины дают друг другу имена — используют уникальные свисты для идентификации.",
+                "Страусы бегают быстрее лошадей, развивая скорость до 70 км/ч.",
+                "У пчёл есть собственный математический язык — виляющий танец указывает направление к цветам.",
+                "Крокодилы не могут высовывать язык из-за мембраны, удерживающей его.",
+                "Гренландские акулы живут более 400 лет, достигая половой зрелости к 150 годам.",
+                "Ленивцы могут задерживать дыхание под водой дольше, чем дельфины — до 40 минут.",
+                "У улиток до 25 000 зубов, расположенных на языке-тёрке.",
+                "Вомбаты производят кубические экскременты — уникальная особенность.",
+                "Белые медведи имеют чёрную кожу под белым мехом, чтобы лучше поглощать тепло.",
+                "Муравьи никогда не спят, а их колонии могут насчитывать миллионы особей.",
+                "У осьминогов 9 мозгов — один главный и 8 в щупальцах.",
+                "Пауки-скакунчики видят в ультрафиолете и имеют почти 360° обзор.",
+                "Кенгуру не могут двигаться назад из-за строения хвоста и ног.",
+                "Вомбаты и коалы — ближайшие родственники, хотя выглядят по-разному.",
+                "У горбатых китов самый громкий звук в животном мире — до 188 децибел."
+            ]
+        },
+        science: {
+            name: "🧪 Наука & Технологии",
+            facts: [
+                "Лазеры могут быть настолько мощными, что создают температуру выше, чем в ядре Солнца.",
+                "Человеческий мозг генерирует около 20 ватт электроэнергии — достаточно для светодиодной лампочки.",
+                "Интернет весит примерно 50 граммов — если сложить массу электронов, передающих данные.",
+                "Стекло — на самом деле медленно текущая жидкость, но процесс занимает миллиарды лет.",
+                "Самый быстрый объект, созданный человеком, — зонд Parker Solar Probe: скорость ~700 000 км/ч.",
+                "В 3D-печати можно создавать человеческие органы из биочернил на основе живых клеток.",
+                "Смартфон современного уровня мощнее компьютеров, которые вели Apollo 11 на Луну, в миллионы раз.",
+                "Квантовые компьютеры используют кубиты, которые могут быть и 0, и 1 одновременно.",
+                "Робот-хирург Da Vinci выполняет операции с точностью до микрона.",
+                "Вакцина от COVID-19 на основе мРНК разрабатывалась годами ранее, а создали её за 11 месяцев.",
+                "Искусственный интеллект AlphaFold предсказал структуру почти всех известных белков.",
+                "Первый в мире веб-сайт всё ещё доступен: info.cern.ch (создан в 1991).",
+                "Существуют «умные» окна, которые могут менять прозрачность при подаче напряжения.",
+                "Китайская графеновая батарея заряжается на 80% за 8 минут и работает 20 лет.",
+                "Ядерный синтез (термоядерная энергия) даёт в миллион раз больше энергии, чем уголь.",
+                "Графен в 200 раз прочнее стали, но при этом прозрачен.",
+                "Беспилотные автомобили обрабатывают более 2 гигабайт данных в секунду.",
+                "Человек использует всего 10% мозга — это миф, на самом деле все области активны.",
+                "Технология CRISPR позволяет редактировать гены с невероятной точностью.",
+                "В 2023 году учёные создали «живую кожу» для роботов, которая самовосстанавливается."
+            ]
+        },
+        history: {
+            name: "🏛️ История & Культура",
+            facts: [
+                "Клеопатра жила ближе по времени к изобретению iPhone, чем к строительству пирамид Гизы.",
+                "В Древнем Риме гладиаторские бои иногда рекламировали как «бесплатный обед» с едой.",
+                "Наполеона Бонапарта атаковала армия кроликов во время охоты — они приняли его за врага.",
+                "Самая длинная война в истории — Столетняя война (116 лет), но мир без боёв был дольше.",
+                "Великая Китайская стена не видна из космоса невооружённым глазом — распространённый миф.",
+                "В древнем Египте зубные врачи умели делать протезы из раковин и металла.",
+                "Викинги открыли Америку за 500 лет до Колумба, основав поселение в Ньюфаундленде.",
+                "Книгопечатание Гутенберга в XV веке изменило Европу быстрее, чем интернет в XX.",
+                "Шоколад был деньгами у ацтеков — за 100 какао-бобов можно купить раба.",
+                "Самое короткое письмо в истории написал Виктор Гюго издателю: «?» — означало «Как продажи?».",
+                "Во время чумы в XIV веке врачи носили клювовидные маски, наполненные ароматными травами.",
+                "Танцующий фестиваль 1518 года в Страсбурге: сотни людей танцевали неделями до истощения.",
+                "Первая женщина-программист — Ада Лавлейс (XIX век), написала алгоритм для аналитической машины.",
+                "Великая пирамида Гизы была самым высоким сооружением в мире 3800 лет.",
+                "Кофе в Османской империи могли запретить, но султан разрешил, попробовав напиток.",
+                "Титаник имел роскошную библиотеку, но ключ от шкафа с биноклем забыли — и не заметили айсберг вовремя.",
+                "В Древней Греции философ Диоген жил в бочке и однажды попросил Александра Македонского отойти, не загораживать солнце.",
+                "Екатерина Великая ввела в России первую обязательную вакцинацию от оспы (1768 г.).",
+                "Самый старый в мире действующий университет — Аль-Карауин в Марокко (основан в 859 г.).",
+                "Черная смерть (чума) уменьшила население Европы на 30–50%, что привело к росту зарплат и социальным изменениям."
+            ]
+        }
+    };
+
+    const topicsList = [
+        { id: "cosmos", display: "🌠 Космос" },
+        { id: "animals", display: "🐘 Животные" },
+        { id: "science", display: "⚛️ Наука" },
+        { id: "history", display: "🏺 История" }
+    ];
+
+    let currentTopicId = "cosmos";
+
+    function getTopicData(topicId) {
+        switch(topicId) {
+            case "cosmos": return factsDatabase.cosmos;
+            case "animals": return factsDatabase.animals;
+            case "science": return factsDatabase.science;
+            case "history": return factsDatabase.history;
+            default: return factsDatabase.cosmos;
+        }
+    }
+
+    function renderMenu() {
+        const menuContainer = document.getElementById("topicMenu");
+        if (!menuContainer) return;
+        menuContainer.innerHTML = "";
+        topicsList.forEach(topic => {
+            const btn = document.createElement("button");
+            btn.className = `topic-btn ${currentTopicId === topic.id ? "active" : ""}`;
+            btn.textContent = topic.display;
+            btn.setAttribute("data-topic", topic.id);
+            btn.addEventListener("click", () => {
+                if (currentTopicId === topic.id) return;
+                currentTopicId = topic.id;
+                renderMenu();
+                renderFacts();
+            });
+            menuContainer.appendChild(btn);
+        });
+    }
+
+    function renderFacts() {
+        const container = document.getElementById("factsContainer");
+        const counterSpan = document.getElementById("factCounter");
+        if (!container) return;
+
+        const topic = getTopicData(currentTopicId);
+        const factsList = topic.facts;
+        const topicNameDisplay = (currentTopicId === "cosmos") ? "Космос" :
+                                 (currentTopicId === "animals") ? "Животный мир" :
+                                 (currentTopicId === "science") ? "Наука и технологии" : "История и культура";
+
+        const factCount = factsList.length;
+        if (factCount < 20) {
+            console.warn(`В теме ${currentTopicId} только ${factCount} фактов, требуется минимум 20!`);
+        }
+        counterSpan.innerHTML = `📖 ${topicNameDisplay} · ${factCount} фактов`;
+
+        container.innerHTML = "";
+        const iconMap = {
+            cosmos: ["🪐","🌕","🚀","⭐","🛸","🌠","☀️","🌍","🔭","🌌"],
+            animals: ["🐙","🐘","🦒","🐦","🐱","🐬","🐊","🐝","🦈","🐨"],
+            science: ["⚛️","🔬","💻","🧬","🤖","🖥️","🧪","📡","🔋","🧲"],
+            history: ["🏛️","📜","⚔️","👑","🏺","🎭","📖","🗿","⏳","🕯️"]
+        };
+        let iconsForTopic = iconMap[currentTopicId] || iconMap.cosmos;
+        
+        factsList.forEach((fact, idx) => {
+            const card = document.createElement("div");
+            card.className = "fact-card";
+            card.style.animationDelay = `${(idx % 10) * 0.02}s`;
+            const iconChar = iconsForTopic[idx % iconsForTopic.length];
+            const iconSpan = document.createElement("div");
+            iconSpan.className = "fact-icon";
+            iconSpan.textContent = iconChar;
+            
+            const textSpan = document.createElement("div");
+            textSpan.className = "fact-text";
+            textSpan.innerHTML = `<span style="font-weight:700; color:#2563eb;">${idx+1}.</span> ${fact}`;
+            
+            card.appendChild(iconSpan);
+            card.appendChild(textSpan);
+            container.appendChild(card);
+        });
+        
+    }
+
+    function init() {
+        renderMenu();
+        renderFacts();
+    }
+
+    init();
+</script>
+</body>
+</html>

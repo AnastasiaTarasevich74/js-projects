@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Фактотека</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(2px);
+            border-radius: 2rem;
+            padding: 1.5rem 2rem 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0f2b3d, #1e4a76);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .header p {
+            color: #2c4c6e;
+            margin: 0.5rem 0 1.2rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+        }
+
+        .dashboard {
+            display: flex;
+            gap: 1.8rem;
+            flex-wrap: wrap;
+        }
+
+        .sort-panel {
+            width: 240px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .sort-panel h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3b82f6;
+            display: inline-block;
+            color: #1e293b;
+        }
+
+        .sort-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .sort-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 0.65rem 1rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .sort-btn:hover {
+            background: #e0e7ff;
+            transform: translateX(5px);
+        }
+
+        .sort-btn.active {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .topic-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #cbd5e180;
+            padding-bottom: 0.8rem;
+        }
+
+        .topic-btn {
+            background: #ffffffcc;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            border-radius: 40px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+        }
+
+        .topic-btn.active {
+            background: #0f3b6f;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .burger-btn {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-panel {
+            position: absolute;
+            top: 55px;
+            left: 0;
+            background: #ffffffef;
+            backdrop-filter: blur(12px);
+            border-radius: 1.5rem;
+            width: 380px;
+            padding: 1.2rem;
+            box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.2);
+            border: 1px solid #cbd5e1;
+            z-index: 100;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .filter-panel.open {
+            display: block;
+        }
+
+        .filter-group {
+            margin-bottom: 1.4rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.8rem;
+        }
+
+        .filter-group h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin-bottom: 8px;
+            border-left: 3px solid #3b82f6;
+            padding-left: 8px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-chip {
+            background: #f1f5f9;
+            border-radius: 30px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+            border: 1px solid transparent;
+        }
+
+        .filter-chip.selected {
+            background: #1e3a8a;
+            color: white;
+            border-color: white;
+        }
+
+        .apply-filters-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .clear-filters {
+            background: #475569;
+            margin-top: 6px;
+        }
+
+        .facts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .fact-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.3rem;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .fact-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 28px -12px rgba(0, 0, 0, 0.2);
+        }
+
+        .fact-icon {
+            font-size: 2rem;
+            min-width: 48px;
+            height: 48px;
+            background: #eef2ff;
+            border-radius: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fact-text {
+            flex: 1;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #0f172a;
+        }
+
+        .counter-info {
+            background: #e6f0ff;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 0.5rem 0 0.8rem;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+
+        @media (max-width: 780px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            .sort-panel {
+                width: 100%;
+                position: static;
+            }
+            .filter-panel {
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="header">
+        <h1>📖 Фактотека · 5 категорий фильтров</h1>
+    </div>
+
+    <div class="dashboard">
+        <div class="sort-panel">
+            <h3>📊 Сортировка</h3>
+            <div class="sort-options">
+                <button class="sort-btn" data-sort="default">✨ По умолчанию</button>
+                <button class="sort-btn" data-sort="alphabet">🔤 По алфавиту (А→Я)</button>
+                <button class="sort-btn" data-sort="length">📏 По длине (короткие сначала)</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="topic-menu" id="topicMenu"></div>
+
+            <div class="filter-section">
+                <button class="burger-btn" id="burgerToggle">☰ 🔍 Фильтры (5 категорий × 4 фильтра)</button>
+                <div class="filter-panel" id="filterPanel">
+                    <div id="filtersContainer"></div>
+                    <button class="apply-filters-btn" id="applyFiltersBtn">✅ Применить фильтры</button>
+                    <button class="apply-filters-btn clear-filters" id="clearFiltersBtn">🗑️ Сбросить все</button>
+                </div>
+            </div>
+
+            <div class="counter-info" id="factCounter">Фактов: --</div>
+            <div id="factsContainer" class="facts-grid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const factsDB = {
+        cosmos: {
+            name: "🌌 Космос",
+            facts: [
+                "Космическое пространство не полностью пустое — в каждом кубическом сантиметре содержится несколько атомов водорода.",
+                "Один день на Венере длится дольше, чем один год на Венере (243 земных дня против 225).",
+                "Нейтронные звёзды настолько плотны, что чайная ложка их вещества весила бы миллиарды тонн.",
+                "Самый большой известный вулкан в Солнечной системе — Олимп на Марсе, почти в 3 раза выше Эвереста.",
+                "На МКС астронавты видят 16 рассветов и закатов за сутки.",
+                "Космический телескоп Джеймса Уэбба может видеть инфракрасный свет от первых галактик.",
+                "Если два куска металла одинакового состава соприкоснутся в вакууме, они свариваются — эффект холодной сварки.",
+                "Спутник Юпитера Европа под ледяной корой скрывает океан, воды в котором больше, чем на Земле.",
+                "Чёрная дыра в центре Млечного Пути называется Стрелец A* и имеет массу 4 млн солнц.",
+                "Звезда Бетельгейзе настолько огромна, что если поместить её в центр Солнечной системы, она поглотит Юпитер.",
+                "Астронавты вырастают на 3–5 см в космосе из-за отсутствия гравитации, сжимающей позвоночник.",
+                "Солнце теряет около 4 миллионов тонн массы каждую секунду из-за ядерного синтеза.",
+                "На Титане, спутнике Сатурна, идут дожди из жидкого метана, и есть реки и озёра.",
+                "Гамма-всплески — самые мощные взрывы во Вселенной после Большого взрыва.",
+                "Млечный Путь и галактика Андромеды столкнутся через ~4,5 млрд лет.",
+                "Космический запах — астронавты описывают его как жареный стейк или горячий металл.",
+                "Экзопланета WASP-12b имеет форму яйца из-за приливных сил своей звезды.",
+                "На Луне есть застывшие лавовые трубы, достаточно большие, чтобы вместить город.",
+                "Созвездие Ориона видно почти из любой точки мира и содержит туманности.",
+                "Зонд «Вояджер-1» уже вышел в межзвёздное пространство и несёт золотую пластинку с записями Земли."
+            ]
+        },
+        animals: {
+            name: "🐾 Животный мир",
+            facts: [
+                "Осьминоги имеют три сердца, а их кровь синего цвета из-за гемоцианина.",
+                "Слоны — единственные млекопитающие, которые не умеют прыгать, зато отлично плавают.",
+                "У жирафов такое же количество шейных позвонков, как у человека — 7, но каждый длиной до 25 см.",
+                "Колибри — единственные птицы, способные летать назад.",
+                "У кошек около 100 различных звуков, тогда как у собак — всего 10.",
+                "Дельфины дают друг другу имена — используют уникальные свисты для идентификации.",
+                "Страусы бегают быстрее лошадей, развивая скорость до 70 км/ч.",
+                "У пчёл есть собственный математический язык — виляющий танец указывает направление к цветам.",
+                "Крокодилы не могут высовывать язык из-за мембраны, удерживающей его.",
+                "Гренландские акулы живут более 400 лет, достигая половой зрелости к 150 годам.",
+                "Ленивцы могут задерживать дыхание под водой дольше, чем дельфины — до 40 минут.",
+                "У улиток до 25 000 зубов, расположенных на языке-тёрке.",
+                "Вомбаты производят кубические экскременты — уникальная особенность.",
+                "Белые медведи имеют чёрную кожу под белым мехом, чтобы лучше поглощать тепло.",
+                "Муравьи никогда не спят, а их колонии могут насчитывать миллионы особей.",
+                "У осьминогов 9 мозгов — один главный и 8 в щупальцах.",
+                "Пауки-скакунчики видят в ультрафиолете и имеют почти 360° обзор.",
+                "Кенгуру не могут двигаться назад из-за строения хвоста и ног.",
+                "Вомбаты и коалы — ближайшие родственники, хотя выглядят по-разному.",
+                "У горбатых китов самый громкий звук в животном мире — до 188 децибел."
+            ]
+        },
+        science: {
+            name: "🧪 Наука & Технологии",
+            facts: [
+                "Лазеры могут быть настолько мощными, что создают температуру выше, чем в ядре Солнца.",
+                "Человеческий мозг генерирует около 20 ватт электроэнергии — достаточно для светодиодной лампочки.",
+                "Интернет весит примерно 50 граммов — если сложить массу электронов, передающих данные.",
+                "Стекло — на самом деле медленно текущая жидкость, но процесс занимает миллиарды лет.",
+                "Самый быстрый объект, созданный человеком, — зонд Parker Solar Probe: скорость ~700 000 км/ч.",
+                "В 3D-печати можно создавать человеческие органы из биочернил на основе живых клеток.",
+                "Смартфон современного уровня мощнее компьютеров, которые вели Apollo 11 на Луну, в миллионы раз.",
+                "Квантовые компьютеры используют кубиты, которые могут быть и 0, и 1 одновременно.",
+                "Робот-хирург Da Vinci выполняет операции с точностью до микрона.",
+                "Вакцина от COVID-19 на основе мРНК разрабатывалась годами ранее, а создали её за 11 месяцев.",
+                "Искусственный интеллект AlphaFold предсказал структуру почти всех известных белков.",
+                "Первый в мире веб-сайт всё ещё доступен: info.cern.ch (создан в 1991).",
+                "Существуют «умные» окна, которые могут менять прозрачность при подаче напряжения.",
+                "Китайская графеновая батарея заряжается на 80% за 8 минут и работает 20 лет.",
+                "Ядерный синтез (термоядерная энергия) даёт в миллион раз больше энергии, чем уголь.",
+                "Графен в 200 раз прочнее стали, но при этом прозрачен.",
+                "Беспилотные автомобили обрабатывают более 2 гигабайт данных в секунду.",
+                "Человек использует всего 10% мозга — это миф, на самом деле все области активны.",
+                "Технология CRISPR позволяет редактировать гены с невероятной точностью.",
+                "В 2023 году учёные создали «живую кожу» для роботов, которая самовосстанавливается."
+            ]
+        },
+        history: {
+            name: "🏛️ История & Культура",
+            facts: [
+                "Клеопатра жила ближе по времени к изобретению iPhone, чем к строительству пирамид Гизы.",
+                "В Древнем Риме гладиаторские бои иногда рекламировали как «бесплатный обед» с едой.",
+                "Наполеона Бонапарта атаковала армия кроликов во время охоты — они приняли его за врага.",
+                "Самая длинная война в истории — Столетняя война (116 лет), но мир без боёв был дольше.",
+                "Великая Китайская стена не видна из космоса невооружённым глазом — распространённый миф.",
+                "В древнем Египте зубные врачи умели делать протезы из раковин и металла.",
+                "Викинги открыли Америку за 500 лет до Колумба, основав поселение в Ньюфаундленде.",
+                "Книгопечатание Гутенберга в XV веке изменило Европу быстрее, чем интернет в XX.",
+                "Шоколад был деньгами у ацтеков — за 100 какао-бобов можно купить раба.",
+                "Самое короткое письмо в истории написал Виктор Гюго издателю: «?» — означало «Как продажи?».",
+                "Во время чумы в XIV веке врачи носили клювовидные маски, наполненные ароматными травами.",
+                "Танцующий фестиваль 1518 года в Страсбурге: сотни людей танцевали неделями до истощения.",
+                "Первая женщина-программист — Ада Лавлейс (XIX век), написала алгоритм для аналитической машины.",
+                "Великая пирамида Гизы была самым высоким сооружением в мире 3800 лет.",
+                "Кофе в Османской империи могли запретить, но султан разрешил, попробовав напиток.",
+                "Титаник имел роскошную библиотеку, но ключ от шкафа с биноклем забыли — и не заметили айсберг вовремя.",
+                "В Древней Греции философ Диоген жил в бочке и однажды попросил Александра Македонского отойти, не загораживать солнце.",
+                "Екатерина Великая ввела в России первую обязательную вакцинацию от оспы (1768 г.).",
+                "Самый старый в мире действующий университет — Аль-Карауин в Марокко (основан в 859 г.).",
+                "Черная смерть (чума) уменьшила население Европы на 30–50%, что привело к росту зарплат и социальным изменениям."
+            ]
+        }
+    };
+
+    const filterCategories = {
+        category1: { 
+            name: "🌍 География / Вселенная", 
+            options: ["звезда", "планета", "океан", "галактика"]
+        },
+        category2: { 
+            name: "🦴 Живые существа", 
+            options: ["животн", "птиц", "рыб", "насеком"]
+        },
+        category3: { 
+            name: "⚡ Технологии / Наука", 
+            options: ["робот", "компьютер", "лазер", "искусственный интеллект"]
+        },
+        category4: { 
+            name: "📜 Временные эпохи", 
+            options: ["древн", "средневеков", "xx", "век"]
+        },
+        category5: {
+            name: "📏 Длина текста (символы)",
+            options: ["короткие (до 60)", "средние (61-100)", "длинные (101-140)", "очень длинные (141+)"]
+        }
+    };
+
+    let currentTopic = "cosmos";
+    let activeFilters = {
+        category1: [],
+        category2: [],
+        category3: [],
+        category4: [],
+        category5: []
+    };
+    let currentSort = "default";
+
+    function getRawFacts(topicId) {
+        return factsDB[topicId]?.facts || [];
+    }
+
+    function matchesLengthFilter(factText, selectedLengthOptions) {
+        if (selectedLengthOptions.length === 0) return true;
+        const length = factText.length;
+        let matches = false;
+        for (let opt of selectedLengthOptions) {
+            if (opt === "короткие (до 60)" && length <= 60) matches = true;
+            else if (opt === "средние (61-100)" && length >= 61 && length <= 100) matches = true;
+            else if (opt === "длинные (101-140)" && length >= 101 && length <= 140) matches = true;
+            else if (opt === "очень длинные (141+)" && length >= 141) matches = true;
+        }
+        return matches;
+    }
+
+    function filterFacts(factsArray, filters) {
+        if (!factsArray.length) return [];
+        const hasAnyFilter = Object.values(filters).some(arr => arr.length > 0);
+        if (!hasAnyFilter) return [...factsArray];
+
+        return factsArray.filter(fact => {
+            const lowerFact = fact.toLowerCase();
+            for (let i = 1; i <= 4; i++) {
+                const catKey = `category${i}`;
+                const selected = filters[catKey];
+                if (selected.length === 0) continue;
+                let catMatch = false;
+                for (let kw of selected) {
+                    if (lowerFact.includes(kw.toLowerCase())) {
+                        catMatch = true;
+                        break;
+                    }
+                }
+                if (!catMatch) return false;
+            }
+            if (!matchesLengthFilter(fact, filters.category5)) return false;
+            
+            return true;
+        });
+    }
+
+    function sortFacts(factsArray, sortType) {
+        const arr = [...factsArray];
+        if (sortType === "alphabet") {
+            arr.sort((a, b) => a.localeCompare(b, 'ru'));
+        } else if (sortType === "length") {
+            arr.sort((a, b) => a.length - b.length);
+        }
+        return arr;
+    }
+
+    function renderFacts() {
+        const raw = getRawFacts(currentTopic);
+        let filtered = filterFacts(raw, activeFilters);
+        const sorted = sortFacts(filtered, currentSort);
+        const container = document.getElementById("factsContainer");
+        const counterSpan = document.getElementById("factCounter");
+        const topicName = factsDB[currentTopic].name;
+        const filterActive = Object.values(activeFilters).some(arr => arr.length > 0);
+        
+        counterSpan.innerHTML = `📌 ${topicName} · Показано: ${sorted.length} из ${raw.length} фактов ${filterActive ? '🔍 (фильтры активны)' : ''}`;
+        
+        if (!container) return;
+        container.innerHTML = "";
+        
+        const iconSets = {
+            cosmos: ["🪐", "🌕", "🚀", "⭐", "🛸", "🌠", "☀️", "🌍", "🔭", "🌌"],
+            animals: ["🐙", "🐘", "🦒", "🐦", "🐱", "🐬", "🐊", "🐝", "🦈", "🐨"],
+            science: ["⚛️", "🔬", "💻", "🧬", "🤖", "🖥️", "🧪", "📡", "🔋", "🧲"],
+            history: ["🏛️", "📜", "⚔️", "👑", "🏺", "🎭", "📖", "🗿", "⏳", "🕯️"]
+        };
+        const icons = iconSets[currentTopic] || iconSets.cosmos;
+        
+        if (sorted.length === 0) {
+            container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem;">🔎 Нет фактов под выбранные фильтры. Попробуйте другие ключевые слова или сбросьте фильтры.</div>`;
+            return;
+        }
+        
+        sorted.forEach((fact, idx) => {
+            const card = document.createElement("div");
+            card.className = "fact-card";
+            const iconSpan = document.createElement("div");
+            iconSpan.className = "fact-icon";
+            iconSpan.textContent = icons[idx % icons.length];
+            const textSpan = document.createElement("div");
+            textSpan.className = "fact-text";
+            textSpan.innerHTML = `<strong>${idx+1}.</strong> ${fact} <span style="font-size:0.7rem; color:#6c757d;">(${fact.length} симв.)</span>`;
+            card.appendChild(iconSpan);
+            card.appendChild(textSpan);
+            container.appendChild(card);
+        });
+    }
+    
+    function renderFilterPanel() {
+        const container = document.getElementById("filtersContainer");
+        if (!container) return;
+        container.innerHTML = "";
+        for (let [catKey, catData] of Object.entries(filterCategories)) {
+            const groupDiv = document.createElement("div");
+            groupDiv.className = "filter-group";
+            groupDiv.innerHTML = `<h4>${catData.name}</h4><div class="filter-options" data-category="${catKey}"></div>`;
+            const optionsDiv = groupDiv.querySelector(".filter-options");
+            catData.options.forEach(opt => {
+                const chip = document.createElement("div");
+                chip.className = "filter-chip";
+                chip.textContent = opt;
+                if (activeFilters[catKey] && activeFilters[catKey].includes(opt)) {
+                    chip.classList.add("selected");
+                }
+                chip.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (activeFilters[catKey].includes(opt)) {
+                        activeFilters[catKey] = activeFilters[catKey].filter(v => v !== opt);
+                        chip.classList.remove("selected");
+                    } else {
+                        activeFilters[catKey].push(opt);
+                        chip.classList.add("selected");
+                    }
+                });
+                optionsDiv.appendChild(chip);
+            });
+            container.appendChild(groupDiv);
+        }
+    }
+    
+    function applyFiltersAndRender() {
+        renderFacts();
+        const panel = document.getElementById("filterPanel");
+        if (panel) panel.classList.remove("open");
+    }
+    
+    function clearAllFilters() {
+        activeFilters = { category1: [], category2: [], category3: [], category4: [], category5: [] };
+        renderFilterPanel();
+        renderFacts();
+    }
+    
+    function renderTopicMenu() {
+        const menuDiv = document.getElementById("topicMenu");
+        if (!menuDiv) return;
+        const topics = Object.keys(factsDB);
+        menuDiv.innerHTML = "";
+        topics.forEach(tid => {
+            const btn = document.createElement("button");
+            btn.className = `topic-btn ${currentTopic === tid ? "active" : ""}`;
+            btn.textContent = factsDB[tid].name;
+            btn.addEventListener("click", () => {
+                if (currentTopic === tid) return;
+                currentTopic = tid;
+                renderTopicMenu();
+                renderFilterPanel();
+                renderFacts();
+            });
+            menuDiv.appendChild(btn);
+        });
+    }
+    
+    function initSorting() {
+        const sortBtns = document.querySelectorAll(".sort-btn");
+        sortBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                const val = btn.getAttribute("data-sort");
+                if (val === "default") currentSort = "default";
+                else if (val === "alphabet") currentSort = "alphabet";
+                else if (val === "length") currentSort = "length";
+                sortBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                renderFacts();
+            });
+            if ((currentSort === "default" && btn.getAttribute("data-sort") === "default") ||
+                (currentSort === "alphabet" && btn.getAttribute("data-sort") === "alphabet") ||
+                (currentSort === "length" && btn.getAttribute("data-sort") === "length")) {
+                btn.classList.add("active");
+            }
+        });
+    }
+    
+    function initBurger() {
+        const burger = document.getElementById("burgerToggle");
+        const panel = document.getElementById("filterPanel");
+        burger.addEventListener("click", (e) => {
+            e.stopPropagation();
+            panel.classList.toggle("open");
+        });
+        document.addEventListener("click", (e) => {
+            if (panel && !panel.contains(e.target) && e.target !== burger) {
+                panel.classList.remove("open");
+            }
+        });
+        document.getElementById("applyFiltersBtn")?.addEventListener("click", applyFiltersAndRender);
+        document.getElementById("clearFiltersBtn")?.addEventListener("click", clearAllFilters);
+    }
+    
+    function init() {
+        renderTopicMenu();
+        renderFilterPanel();
+        initBurger();
+        renderFacts();
+        initSorting();
+    }
+    
+    init();
+</script>
+</body>
+</html>

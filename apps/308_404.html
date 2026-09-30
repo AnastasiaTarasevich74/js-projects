@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Список дел</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #f0f2f5;
+            font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .todo-container {
+            max-width: 650px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .header {
+            background: white;
+            padding: 1.5rem 1.8rem 0.8rem;
+            border-bottom: 1px solid #eef2f6;
+        }
+
+        .date-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: #f0f2f5;
+            border: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            color: #1e293b;
+        }
+
+        .nav-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.96);
+        }
+
+        .date-title {
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+        }
+
+        .add-btn {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            box-shadow: 0 2px 6px rgba(59,130,246,0.2);
+        }
+
+        .add-btn:hover {
+            background: #2563eb;
+        }
+
+        .task-list {
+            padding: 1.2rem 1.8rem 2rem;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 320px;
+        }
+
+        .task-item {
+            background: #ffffff;
+            border: 1px solid #e9edf2;
+            border-radius: 20px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: 0.15s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .task-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .task-check {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+            flex-shrink: 0;
+        }
+
+        .task-text {
+            font-size: 1rem;
+            font-weight: 450;
+            color: #1e293b;
+            transition: 0.1s;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .completed .task-text {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 40px;
+            transition: 0.1s;
+            font-family: monospace;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .action-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .move-btn {
+            color: #3b82f6;
+        }
+
+        .delete-btn {
+            color: #ef4444;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 48px 20px;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            background: #fafcff;
+            border-radius: 28px;
+            border: 1px dashed #cbd5e1;
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 12px;
+            color: #94a3b8;
+            border-top: 1px solid #eef2f6;
+            background: #fefefe;
+        }
+
+        @media (max-width: 500px) {
+            .task-item {
+                flex-wrap: wrap;
+            }
+            .task-actions {
+                margin-left: auto;
+            }
+            .date-title {
+                font-size: 1.4rem;
+            }
+            .todo-container {
+                border-radius: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="todo-container">
+    <div class="header">
+        <div class="date-nav">
+            <div class="nav-buttons">
+                <button class="nav-btn" id="yesterdayBtn">← Вчера</button>
+                <button class="nav-btn" id="tomorrowBtn">Завтра →</button>
+            </div>
+            <button class="add-btn" id="addTaskBtn">+ Добавить задачу</button>
+        </div>
+        <div class="date-title" id="currentDateTitle">Сегодня</div>
+    </div>
+
+    <ul class="task-list" id="taskList">
+        <li class="empty-message">Задач пока нет. Нажмите "Добавить задачу"</li>
+    </ul>
+</div>
+
+<script>
+    let tasksDB = new Map();
+
+    let currentDisplayDate = getTodayLocalDateKey();
+
+    function getTodayLocalDateKey() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getPrevDay(dateKey) {
+        const date = new Date(dateKey + 'T12:00:00');
+        date.setDate(date.getDate() - 1);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function getNextDay(dateKey) {
+        const date = new Date(dateKey + 'T12:00:00');
+        date.setDate(date.getDate() + 1);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDisplayTitle(dateKey) {
+        const todayKey = getTodayLocalDateKey();
+        const yesterdayKey = getPrevDay(todayKey);
+        const tomorrowKey = getNextDay(todayKey);
+
+        if (dateKey === todayKey) return "📅 Сегодня";
+        if (dateKey === yesterdayKey) return "⬅️ Вчера";
+        if (dateKey === tomorrowKey) return "➡️ Завтра";
+        const [year, month, day] = dateKey.split('-');
+        const dateObj = new Date(Date.UTC(year, month-1, day));
+        const monthNames = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+        return `${parseInt(day)} ${monthNames[parseInt(month)-1]} ${year}`;
+    }
+
+    function initDemoData() {
+        const today = getTodayLocalDateKey();
+        const yesterday = getPrevDay(today);
+        const tomorrow = getNextDay(today);
+
+        if (!tasksDB.has(today)) {
+            tasksDB.set(today, [
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-1', text: 'Задача 1', completed: false },
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-2', text: 'Задача 2', completed: true },
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-3', text: 'Задача 3', completed: false },
+            ]);
+        }
+        if (!tasksDB.has(yesterday)) {
+            tasksDB.set(yesterday, [
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-y1', text: 'Задача 4', completed: true },
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-y2', text: 'Задача 5', completed: false },
+            ]);
+        }
+        if (!tasksDB.has(tomorrow)) {
+            tasksDB.set(tomorrow, [
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-t1', text: 'Задача 6', completed: false },
+                { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-t2', text: 'Задача 7', completed: false },
+            ]);
+        }
+    }
+
+    function getTasksForDate(dateKey) {
+        if (!tasksDB.has(dateKey)) return [];
+        return tasksDB.get(dateKey);
+    }
+
+    function setTasksForDate(dateKey, tasksArray) {
+        tasksDB.set(dateKey, tasksArray);
+    }
+
+    function addTaskToDate(dateKey, taskText) {
+        if (!taskText || taskText.trim() === '') return false;
+        const trimmed = taskText.trim();
+        const tasks = getTasksForDate(dateKey);
+        const newTask = {
+            id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random(),
+            text: trimmed,
+            completed: false
+        };
+        tasks.push(newTask);
+        setTasksForDate(dateKey, tasks);
+        return true;
+    }
+
+    function deleteTaskFromDate(dateKey, taskId) {
+        let tasks = getTasksForDate(dateKey);
+        const filtered = tasks.filter(t => t.id !== taskId);
+        if (filtered.length === tasks.length) return false;
+        setTasksForDate(dateKey, filtered);
+        return true;
+    }
+
+    function toggleTaskCompleted(dateKey, taskId) {
+        let tasks = getTasksForDate(dateKey);
+        const taskIndex = tasks.findIndex(t => t.id === taskId);
+        if (taskIndex === -1) return false;
+        tasks[taskIndex].completed = !tasks[taskIndex].completed;
+        setTasksForDate(dateKey, tasks);
+        return true;
+    }
+
+    function moveTaskToAnotherDate(dateKeyFrom, taskId) {
+        const tasks = getTasksForDate(dateKeyFrom);
+        const taskToMove = tasks.find(t => t.id === taskId);
+        if (!taskToMove) return false;
+
+        let newDateStr = prompt("Введите дату для переноса дела (в формате ГГГГ-ММ-ДД):\nПример: 2026-04-08", getNextDay(dateKeyFrom));
+        if (newDateStr === null) return false;
+
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(newDateStr)) {
+            alert("Неверный формат! Используйте ГГГГ-ММ-ДД (например, 2026-04-08)");
+            return false;
+        }
+        const [year, month, day] = newDateStr.split('-').map(Number);
+        if (month < 1 || month > 12 || day < 1 || day > 31) {
+            alert("Некорректная дата. Проверьте месяц и день.");
+            return false;
+        }
+        const testDate = new Date(year, month-1, day);
+        if (testDate.getFullYear() !== year || testDate.getMonth() !== month-1 || testDate.getDate() !== day) {
+            alert("Такая дата не существует (например, 31 февраля).");
+            return false;
+        }
+        const targetDateKey = `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+        if (targetDateKey === dateKeyFrom) {
+            alert("Эта задача уже находится на выбранной дате. Перенос не нужен.");
+            return false;
+        }
+
+        const remainingTasks = tasks.filter(t => t.id !== taskId);
+        setTasksForDate(dateKeyFrom, remainingTasks);
+
+        const targetTasks = getTasksForDate(targetDateKey);
+        const movedTaskCopy = { ...taskToMove, id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random() };
+        targetTasks.push(movedTaskCopy);
+        setTasksForDate(targetDateKey, targetTasks);
+
+        renderCurrentList();
+        return true;
+    }
+
+    function renderCurrentList() {
+        const tasks = getTasksForDate(currentDisplayDate);
+        const listContainer = document.getElementById('taskList');
+        const titleElement = document.getElementById('currentDateTitle');
+        titleElement.textContent = formatDisplayTitle(currentDisplayDate);
+
+        if (!tasks.length) {
+            listContainer.innerHTML = '<li class="empty-message">✨ Нет дел на этот день ✨<br>Нажмите "Добавить задачу"</li>';
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        tasks.forEach(task => {
+            const li = document.createElement('li');
+            li.className = 'task-item';
+            if (task.completed) li.classList.add('completed');
+
+            const leftDiv = document.createElement('div');
+            leftDiv.className = 'task-left';
+            const checkBox = document.createElement('input');
+            checkBox.type = 'checkbox';
+            checkBox.className = 'task-check';
+            checkBox.checked = task.completed;
+            checkBox.addEventListener('change', (e) => {
+                e.stopPropagation();
+                toggleTaskCompleted(currentDisplayDate, task.id);
+                renderCurrentList();
+            });
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'task-text';
+            textSpan.textContent = task.text;
+
+            leftDiv.appendChild(checkBox);
+            leftDiv.appendChild(textSpan);
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'task-actions';
+
+            const moveBtn = document.createElement('button');
+            moveBtn.textContent = '📅';
+            moveBtn.className = 'action-btn move-btn';
+            moveBtn.title = 'Перенести на другую дату';
+            moveBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                moveTaskToAnotherDate(currentDisplayDate, task.id);
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '✖';
+            deleteBtn.className = 'action-btn delete-btn';
+            deleteBtn.title = 'Удалить задачу';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm(`Удалить задачу "${task.text}"?`)) {
+                    deleteTaskFromDate(currentDisplayDate, task.id);
+                    renderCurrentList();
+                }
+            });
+
+            actionsDiv.appendChild(moveBtn);
+            actionsDiv.appendChild(deleteBtn);
+            li.appendChild(leftDiv);
+            li.appendChild(actionsDiv);
+            fragment.appendChild(li);
+        });
+        listContainer.innerHTML = '';
+        listContainer.appendChild(fragment);
+    }
+
+    function showAddTaskDialog() {
+        let userInput = prompt("Введите новую задачу:", "");
+        if (userInput === null) return;
+        userInput = userInput.trim();
+        if (userInput === "") {
+            alert("Название задачи не может быть пустым.");
+            return;
+        }
+        const success = addTaskToDate(currentDisplayDate, userInput);
+        if (success) {
+            renderCurrentList();
+        } else {
+            alert("Не удалось добавить задачу.");
+        }
+    }
+
+    function goToYesterday() {
+        const yesterdayKey = getPrevDay(currentDisplayDate);
+        currentDisplayDate = yesterdayKey;
+        renderCurrentList();
+    }
+
+    function goToTomorrow() {
+        const tomorrowKey = getNextDay(currentDisplayDate);
+        currentDisplayDate = tomorrowKey;
+        renderCurrentList();
+    }
+
+    function init() {
+        initDemoData();
+        renderCurrentList();
+
+        document.getElementById('addTaskBtn').addEventListener('click', showAddTaskDialog);
+        document.getElementById('yesterdayBtn').addEventListener('click', goToYesterday);
+        document.getElementById('tomorrowBtn').addEventListener('click', goToTomorrow);
+    }
+
+    init();
+</script>
+</body>
+</html>
