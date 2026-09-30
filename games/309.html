@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Морской бой — тренажер на время</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a2f4d 0%, #052136 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Courier New', monospace, system-ui;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(10, 25, 47, 0.7);
+            backdrop-filter: blur(2px);
+            border-radius: 48px;
+            padding: 20px 25px 30px 25px;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(72, 187, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-panel {
+            background: #011a2b;
+            border-radius: 40px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 20px;
+            flex-wrap: wrap;
+            box-shadow: inset 0 2px 3px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.2);
+            border-bottom: 2px solid #2c7cb0;
+            width: 100%;
+        }
+
+        .goal-box, .record-box {
+            background: #00101c;
+            padding: 6px 18px;
+            border-radius: 60px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .goal-box span:first-child, .record-box span:first-child {
+            color: #8bcbff;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            margin-right: 10px;
+        }
+
+        .goal-value, .record-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #f5e56b;
+            text-shadow: 0 0 4px #ffb347;
+            font-family: monospace;
+        }
+
+        .timer-area {
+            background: #000c14;
+            padding: 6px 18px;
+            border-radius: 60px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .timer-label {
+            color: #69c4ff;
+            font-weight: bold;
+        }
+
+        .timer-value {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: monospace;
+            background: #010d17;
+            padding: 0 8px;
+            border-radius: 30px;
+            color: #1effbc;
+            letter-spacing: 2px;
+        }
+
+        .reset-btn {
+            background: #2e5f7a;
+            border: none;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 5px 18px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 3px 0 #0e2a3a;
+        }
+
+        .reset-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #0e2a3a;
+        }
+
+        .game-field {
+            background-color: #1c3f5c;
+            border-radius: 24px;
+            padding: 12px;
+            display: inline-block;
+            box-shadow: inset 0 0 0 2px #5d9bc3, 0 12px 24px rgba(0,0,0,0.3);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(10, 36px);
+            grid-template-rows: repeat(10, 36px);
+            background-color: #2c5a7a;
+            gap: 2px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #1f4a64;
+        }
+
+        .cell {
+            background-color: #3a7ca0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+            color: white;
+            text-shadow: 0 0 2px black;
+        }
+
+        .cell:active {
+            transform: scale(0.96);
+        }
+
+        .cell.miss {
+            background-color: #1a4c6e;
+            cursor: default;
+            background-image: radial-gradient(circle at 30% 35%, rgba(0,0,0,0.3) 2px, transparent 2px);
+        }
+
+        .cell.hit {
+            background-color: #c72a2a;
+            cursor: default;
+            box-shadow: inset 0 0 0 2px #ffb347;
+            color: white;
+        }
+
+        .cell.hit::after {
+            content: "💥";
+            font-size: 1.2rem;
+        }
+
+        .cell.miss::after {
+            content: "·";
+            font-size: 2rem;
+            font-weight: bold;
+            color: #afd9ff;
+            opacity: 0.8;
+        }
+
+        .status-message {
+            margin-top: 18px;
+            text-align: center;
+            background: #021f2c;
+            padding: 8px;
+            border-radius: 40px;
+            font-weight: bold;
+            color: #ffd966;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            width: 100%;
+        }
+
+        @media (max-width: 460px) {
+            .board {
+                grid-template-columns: repeat(10, 28px);
+                grid-template-rows: repeat(10, 28px);
+            }
+            .stats-panel {
+                justify-content: center;
+            }
+            .goal-value, .record-value {
+                font-size: 1.3rem;
+            }
+            .timer-value {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="stats-panel">
+        <div class="goal-box">
+            <span>🎯 ЦЕЛЬ</span>
+            <span class="goal-value">Потопить все корабли</span>
+        </div>
+        <div class="timer-area">
+            <span class="timer-label">⏱️ ВРЕМЯ</span>
+            <span class="timer-value" id="timerDisplay">0.00</span>
+        </div>
+        <div class="record-box">
+            <span>🏆 РЕКОРД</span>
+            <span class="record-value" id="recordDisplay">—</span>
+        </div>
+        <button class="reset-btn" id="resetGameBtn">🔄 Новая игра</button>
+    </div>
+
+    <div class="game-field">
+        <div class="board" id="battleBoard"></div>
+    </div>
+    <div class="status-message" id="statusMsg">⚓ Кликай по клеткам — ищи корабли!</div>
+</div>
+
+<script>
+    (function(){
+        const BOARD_SIZE = 10;
+        let shipsData = [];
+        let boardState = [];
+        let gameActive = true;
+        let startTime = null;
+        let timerInterval = null;
+        let currentBest = Infinity;
+        
+        const SHIP_LENGTHS = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
+        
+        const boardContainer = document.getElementById("battleBoard");
+        const timerDisplay = document.getElementById("timerDisplay");
+        const recordDisplay = document.getElementById("recordDisplay");
+        const resetBtn = document.getElementById("resetGameBtn");
+        const statusMsgDiv = document.getElementById("statusMsg");
+        
+        function loadRecord() {
+            const stored = localStorage.getItem("battleship_best_time");
+            if(stored !== null && !isNaN(parseFloat(stored))) {
+                currentBest = parseFloat(stored);
+                recordDisplay.innerText = currentBest.toFixed(2) + " сек";
+            } else {
+                currentBest = Infinity;
+                recordDisplay.innerText = "—";
+            }
+        }
+        
+        function saveRecordIfBetter(seconds) {
+            if(seconds < currentBest) {
+                currentBest = seconds;
+                localStorage.setItem("battleship_best_time", currentBest.toFixed(3));
+                recordDisplay.innerText = currentBest.toFixed(2) + " сек";
+                statusMsgDiv.innerHTML = "🎉 НОВЫЙ РЕКОРД! 🎉";
+                setTimeout(() => {
+                    if(!gameActive) statusMsgDiv.innerHTML = "✨ ПОБЕДА! ✨ Нажми «Новая игра»";
+                    else statusMsgDiv.innerHTML = "⚓ Кликай по клеткам — ищи корабли!";
+                }, 1800);
+                return true;
+            }
+            return false;
+        }
+        
+        function isValidPlacement(boardGrid, shipLength, x, y, isHorizontal) {
+            for(let i = 0; i < shipLength; i++) {
+                let nx = isHorizontal ? x + i : x;
+                let ny = isHorizontal ? y : y + i;
+                if(nx < 0 || nx >= BOARD_SIZE || ny < 0 || ny >= BOARD_SIZE) return false;
+                if(boardGrid[ny][nx] !== 0) return false;
+                for(let dy = -1; dy <= 1; dy++) {
+                    for(let dx = -1; dx <= 1; dx++) {
+                        let adjX = nx + dx;
+                        let adjY = ny + dy;
+                        if(adjX >= 0 && adjX < BOARD_SIZE && adjY >= 0 && adjY < BOARD_SIZE) {
+                            if(boardGrid[adjY][adjX] !== 0) return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        
+        function placeShipOnGrid(boardGrid, shipLength, x, y, isHorizontal, shipId) {
+            let cells = [];
+            for(let i = 0; i < shipLength; i++) {
+                let nx = isHorizontal ? x + i : x;
+                let ny = isHorizontal ? y : y + i;
+                boardGrid[ny][nx] = shipId;
+                cells.push({x: nx, y: ny});
+            }
+            return cells;
+        }
+        
+        function generateRandomShips() {
+            let grid = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
+            let shipsList = [];
+            let shipId = 1;
+            
+            for(let length of SHIP_LENGTHS) {
+                let placed = false;
+                let attempts = 0;
+                const maxAttempts = 3000;
+                while(!placed && attempts < maxAttempts) {
+                    const isHorizontal = Math.random() < 0.5;
+                    const maxX = isHorizontal ? BOARD_SIZE - length : BOARD_SIZE - 1;
+                    const maxY = isHorizontal ? BOARD_SIZE - 1 : BOARD_SIZE - length;
+                    const x = Math.floor(Math.random() * (maxX + 1));
+                    const y = Math.floor(Math.random() * (maxY + 1));
+                    if(isValidPlacement(grid, length, x, y, isHorizontal)) {
+                        const cells = placeShipOnGrid(grid, length, x, y, isHorizontal, shipId);
+                        shipsList.push({
+                            id: shipId,
+                            length: length,
+                            cells: cells,
+                            hits: 0,
+                            sunk: false
+                        });
+                        shipId++;
+                        placed = true;
+                    }
+                    attempts++;
+                }
+                if(!placed) {
+                    return generateRandomShips();
+                }
+            }
+            return shipsList;
+        }
+        
+        function initBoardStateAndShips() {
+            shipsData = generateRandomShips();
+            boardState = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null));
+            for(let ship of shipsData) {
+                for(let cell of ship.cells) {
+                    boardState[cell.y][cell.x] = null;
+                }
+            }
+        }
+        
+        function renderBoard() {
+            boardContainer.innerHTML = "";
+            for(let row = 0; row < BOARD_SIZE; row++) {
+                for(let col = 0; col < BOARD_SIZE; col++) {
+                    const cellValue = boardState[row][col];
+                    const cellDiv = document.createElement("div");
+                    cellDiv.classList.add("cell");
+                    if(cellValue === 'miss') {
+                        cellDiv.classList.add("miss");
+                    } else if(cellValue === 'hit') {
+                        cellDiv.classList.add("hit");
+                    }
+                    cellDiv.dataset.x = col;
+                    cellDiv.dataset.y = row;
+                    cellDiv.addEventListener("click", (function(x,y){
+                        return function() { onCellClick(x, y); };
+                    })(col, row));
+                    boardContainer.appendChild(cellDiv);
+                }
+            }
+        }
+        
+        function checkVictory() {
+            let allSunk = shipsData.every(ship => ship.sunk === true);
+            if(allSunk && gameActive === true) {
+                gameActive = false;
+                if(timerInterval) clearInterval(timerInterval);
+                const endTime = performance.now();
+                const elapsed = (endTime - startTime) / 1000;
+                const finalSec = parseFloat(elapsed.toFixed(2));
+                timerDisplay.innerText = finalSec.toFixed(2);
+                statusMsgDiv.innerHTML = "🏆 ПОБЕДА! Все корабли потоплены! 🏆";
+                saveRecordIfBetter(finalSec);
+                return true;
+            }
+            return false;
+        }
+        
+        function processShot(x, y) {
+            if(!gameActive) {
+                statusMsgDiv.innerHTML = "Игра окончена. Нажми «Новая игра»";
+                return false;
+            }
+            if(boardState[y][x] === 'hit' || boardState[y][x] === 'miss') {
+                statusMsgDiv.innerHTML = "⚠️ Сюда уже стреляли!";
+                return false;
+            }
+            
+            let hitShip = null;
+            for(let ship of shipsData) {
+                const found = ship.cells.some(cell => cell.x === x && cell.y === y);
+                if(found) {
+                    hitShip = ship;
+                    break;
+                }
+            }
+            
+            if(hitShip) {
+                boardState[y][x] = 'hit';
+                hitShip.hits++;
+                if(hitShip.hits === hitShip.length) {
+                    hitShip.sunk = true;
+                    statusMsgDiv.innerHTML = `💀 ПОТОПЛЕН! Корабль длиной ${hitShip.length} 💀`;
+                } else {
+                    statusMsgDiv.innerHTML = `🔥 РАНЕН! Осталось ${hitShip.length - hitShip.hits} попаданий 🔥`;
+                }
+                renderBoard();
+                checkVictory();
+                return true;
+            } else {
+                boardState[y][x] = 'miss';
+                statusMsgDiv.innerHTML = "💧 МИМО! 💧";
+                renderBoard();
+                return false;
+            }
+        }
+        
+        function onCellClick(x, y) {
+            if(!gameActive) {
+                statusMsgDiv.innerHTML = "🏁 Игра завершена. Нажмите новую игру.";
+                return;
+            }
+            if(startTime === null) {
+                startTime = performance.now();
+                if(timerInterval) clearInterval(timerInterval);
+                timerInterval = setInterval(updateTimer, 100);
+            }
+            processShot(x, y);
+        }
+        
+        function updateTimer() {
+            if(!gameActive) return;
+            if(startTime === null) {
+                timerDisplay.innerText = "0.00";
+                return;
+            }
+            const now = performance.now();
+            let elapsed = (now - startTime) / 1000;
+            timerDisplay.innerText = elapsed.toFixed(2);
+        }
+        
+        function resetAndNewGame() {
+            if(timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            shipsData = generateRandomShips();
+            boardState = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(null));
+            for(let ship of shipsData) {
+                for(let cell of ship.cells) {
+                    boardState[cell.y][cell.x] = null;
+                }
+            }
+            for(let y = 0; y < BOARD_SIZE; y++) {
+                for(let x = 0; x < BOARD_SIZE; x++) {
+                    boardState[y][x] = null;
+                }
+            }
+            for(let ship of shipsData) {
+                ship.hits = 0;
+                ship.sunk = false;
+            }
+            gameActive = true;
+            startTime = null;
+            timerDisplay.innerText = "0.00";
+            statusMsgDiv.innerHTML = "⚓ Новые корабли расставлены! Вперёд! ⚓";
+            renderBoard();
+        }
+        
+        function fullGameInit() {
+            loadRecord();
+            resetAndNewGame();
+        }
+        
+        resetBtn.addEventListener("click", () => {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+            resetAndNewGame();
+        });
+        
+        fullGameInit();
+    })();
+</script>
+</body>
+</html>

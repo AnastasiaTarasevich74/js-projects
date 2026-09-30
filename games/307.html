@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Виселица</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            user-select: none;
+        }
+        body {
+            background: linear-gradient(145deg, #2b3a4a 0%, #1d2a35 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            border-radius: 3rem 3rem 2rem 2rem;
+            padding: 2rem 2rem 2.5rem;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(255, 255, 240, 0.3);
+            width: 850px;
+            max-width: 95%;
+            border: 1px solid rgba(255, 255, 200, 0.2);
+        }
+
+        .category-bar {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        .cat-btn {
+            background: #3a4e5f;
+            border: none;
+            color: #ece9e0;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 0.7rem 2rem;
+            border-radius: 50px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1d2a33, 0 8px 12px black;
+            transition: 0.07s ease;
+            border: 1px solid #5f7485;
+        }
+        .cat-btn.active {
+            background: #f5c542;
+            color: #1d262e;
+            box-shadow: 0 4px 0 #b57c20, 0 8px 15px black;
+            transform: translateY(2px);
+            border-color: #ffdf8c;
+        }
+        .cat-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #1d2a33, 0 5px 12px black;
+        }
+        .cat-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+            transform: none;
+        }
+
+        .hangman-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1rem 0 2rem;
+        }
+        .canvas-wrapper {
+            background: #2d3f4b;
+            border-radius: 40px;
+            padding: 15px 20px 10px 20px;
+            box-shadow: inset 0 -3px 0 #17212b, 0 15px 18px -8px black;
+        }
+        canvas {
+            display: block;
+            width: 240px;
+            height: 240px;
+            background: #e6f0f5;
+            border-radius: 30px;
+            box-shadow: inset 0 0 0 2px #b3c7d4, 0 10px 10px rgba(0,0,0,0.4);
+        }
+        .word-status {
+            background: #263842;
+            border-radius: 50px;
+            padding: 1.2rem 2rem;
+            min-width: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 2px 8px #101c24, 0 10px 10px rgba(0, 0, 0, 0.5);
+        }
+        .word-display {
+            font-size: 3.2rem;
+            letter-spacing: 12px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            color: #fadf9e;
+            text-shadow: 0 4px 0 #8b6f40;
+            margin-bottom: 10px;
+            word-break: break-word;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .mistakes-counter {
+            font-size: 1.4rem;
+            background: #1c2a32;
+            padding: 0.3rem 1.8rem;
+            border-radius: 40px;
+            color: #e2c28b;
+            font-weight: 600;
+            box-shadow: inset 0 2px 5px #0e171f;
+        }
+
+        .keyboard {
+            background: #2b3d48b0;
+            border-radius: 60px 60px 30px 30px;
+            padding: 1.5rem 0.8rem;
+            margin: 25px 0 20px;
+            box-shadow: inset 0 -5px 0 #17232b, 0 10px 15px black;
+        }
+        .key-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin: 0.4rem 0;
+            flex-wrap: wrap;
+        }
+        .key-btn {
+            background: #e6e9f0;
+            border: none;
+            width: 55px;
+            height: 55px;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #102531;
+            border-radius: 20px;
+            box-shadow: 0 6px 0 #7d8b9b, 0 5px 10px black;
+            cursor: pointer;
+            transition: 0.05s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+        }
+        .key-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #6c7c8d, 0 5px 8px black;
+        }
+        .key-btn.used {
+            background: #607482;
+            color: #c0cfdf;
+            box-shadow: 0 3px 0 #3e4d5b;
+            transform: translateY(3px);
+            pointer-events: none;
+            filter: brightness(0.8);
+        }
+
+        .again-wrap {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .again-btn {
+            background: #deb887;
+            border: none;
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 0.6rem 3rem;
+            border-radius: 50px;
+            box-shadow: 0 8px 0 #8b6b42, 0 8px 15px black;
+            cursor: pointer;
+            color: #2a2f1f;
+            transition: 0.07s;
+            letter-spacing: 2px;
+        }
+        .again-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #6b4f32, 0 8px 15px black;
+        }
+        .again-btn.hidden {
+            display: none;
+        }
+
+        .info-message {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #ffdba5;
+            font-weight: 600;
+            min-height: 2.5rem;
+            margin: 0.2rem 0 0.8rem;
+            text-shadow: 0 2px 3px black;
+        }
+        .loading-message {
+            text-align: center;
+            color: #ffd966;
+            font-size: 1.2rem;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <div class="category-bar" id="categoryBar">
+        <button class="cat-btn" data-cat="tech">ТЕХНИКА</button>
+        <button class="cat-btn" data-cat="animals">ЖИВОТНЫЕ</button>
+        <button class="cat-btn" data-cat="fruits">ФРУКТЫ</button>
+    </div>
+
+    <div class="hangman-area">
+        <div class="canvas-wrapper">
+            <canvas id="hangmanCanvas" width="240" height="240"></canvas>
+        </div>
+        <div class="word-status">
+            <div class="word-display" id="wordDisplay">_ _ _ _</div>
+            <div class="mistakes-counter" id="mistakesDisplay">❌ 0 / 10</div>
+        </div>
+    </div>
+
+    <div class="keyboard" id="keyboardContainer"></div>
+
+    <div class="info-message" id="infoMessage"></div>
+
+    <div class="again-wrap">
+        <button class="again-btn hidden" id="restartBtn">🔄 ЕЩЁ РАЗ</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const DB_NAME = 'HangmanDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'words';
+        
+        let db = null;
+        let wordsData = {
+            tech: [],
+            animals: [],
+            fruits: []
+        };
+        let dbInitialized = false;
+        
+        let currentCategory = 'tech';
+        let currentWord = '';
+        let guessedLetters = new Set();
+        let mistakes = 0;
+        let gameActive = true;
+        let isLoading = true;
+
+        const canvas = document.getElementById('hangmanCanvas');
+        const ctx = canvas.getContext('2d');
+        const wordDisplay = document.getElementById('wordDisplay');
+        const mistakesDisplay = document.getElementById('mistakesDisplay');
+        const infoMessage = document.getElementById('infoMessage');
+        const restartBtn = document.getElementById('restartBtn');
+        const categoryButtons = document.querySelectorAll('.cat-btn');
+        const keyboardDiv = document.getElementById('keyboardContainer');
+
+        function initDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = function(event) {
+                    console.error('Ошибка открытия БД:', event.target.error);
+                    reject(event.target.error);
+                };
+                
+                request.onsuccess = function(event) {
+                    db = event.target.result;
+                    console.log('База данных открыта');
+                    resolve();
+                };
+                
+                request.onupgradeneeded = function(event) {
+                    const dbUpgrade = event.target.result;
+                    if (!dbUpgrade.objectStoreNames.contains(STORE_NAME)) {
+                        const store = dbUpgrade.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('category', 'category', { unique: false });
+                        
+                        const initialWords = [
+                            { category: 'tech', word: 'МОНИТОР' },
+                            { category: 'tech', word: 'КЛАВИАТУРА' },
+                            { category: 'tech', word: 'ПРОЦЕССОР' },
+                            { category: 'tech', word: 'НАУШНИКИ' },
+                            { category: 'tech', word: 'МИКРОФОН' },
+                            { category: 'tech', word: 'СКАНЕР' },
+                            { category: 'tech', word: 'ПРИНТЕР' },
+                            { category: 'animals', word: 'КРОКОДИЛ' },
+                            { category: 'animals', word: 'БЕГЕМОТ' },
+                            { category: 'animals', word: 'НОСОРОГ' },
+                            { category: 'animals', word: 'ЖИРАФ' },
+                            { category: 'animals', word: 'СЛОН' },
+                            { category: 'animals', word: 'ЛЕОПАРД' },
+                            { category: 'fruits', word: 'АПЕЛЬСИН' },
+                            { category: 'fruits', word: 'МАНДАРИН' },
+                            { category: 'fruits', word: 'АНАНАС' },
+                            { category: 'fruits', word: 'ГРАНАТ' },
+                            { category: 'fruits', word: 'КИВИ' },
+                            { category: 'fruits', word: 'БАНАН' }
+                        ];
+                        
+                        const transaction = dbUpgrade.transaction([STORE_NAME], 'readwrite');
+                        const storeRef = transaction.objectStore(STORE_NAME);
+                        initialWords.forEach(item => {
+                            storeRef.add(item);
+                        });
+                        
+                        transaction.oncomplete = function() {
+                            console.log('Начальные данные добавлены в БД');
+                        };
+                    }
+                };
+            });
+        }
+
+        function loadWordsFromDB() {
+            return new Promise((resolve, reject) => {
+                if (!db) {
+                    reject(new Error('База данных не инициализирована'));
+                    return;
+                }
+                
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const index = store.index('category');
+                
+                const categories = ['tech', 'animals', 'fruits'];
+                let completed = 0;
+                
+                categories.forEach(category => {
+                    const words = [];
+                    const cursorRequest = index.openCursor(IDBKeyRange.only(category));
+                    
+                    cursorRequest.onsuccess = function(event) {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            words.push(cursor.value.word);
+                            cursor.continue();
+                        } else {
+                            wordsData[category] = words;
+                            completed++;
+                            if (completed === categories.length) {
+                                resolve();
+                            }
+                        }
+                    };
+                    
+                    cursorRequest.onerror = function(event) {
+                        console.error('Ошибка чтения категории:', category, event.target.error);
+                        wordsData[category] = [];
+                        completed++;
+                        if (completed === categories.length) {
+                            resolve();
+                        }
+                    };
+                });
+                
+                transaction.onerror = function(event) {
+                    console.error('Ошибка транзакции:', event.target.error);
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        function drawGallows(mistakeCount) {
+            ctx.clearRect(0, 0, 240, 240);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#2e1e0f';
+            ctx.fillStyle = '#5d3f1e';
+            
+            if (mistakeCount >= 1) ctx.fillRect(20, 210, 150, 12);
+            if (mistakeCount >= 2) ctx.fillRect(50, 50, 15, 160);
+            if (mistakeCount >= 3) ctx.fillRect(50, 50, 110, 10);
+            if (mistakeCount >= 4) ctx.fillRect(140, 60, 8, 30);
+            
+            if (mistakeCount >= 5) {
+                ctx.beginPath();
+                ctx.arc(144, 100, 14, 0, 2 * Math.PI);
+                ctx.fillStyle = '#f7e2c0';
+                ctx.fill();
+                ctx.strokeStyle = '#654321';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            if (mistakeCount >= 6) {
+                ctx.fillStyle = '#2b4f6e';
+                ctx.fillRect(137, 114, 14, 40);
+            }
+            if (mistakeCount >= 7) {
+                ctx.beginPath();
+                ctx.moveTo(144, 124);
+                ctx.lineTo(112, 110);
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = '#2b4f6e';
+                ctx.stroke();
+            }
+            if (mistakeCount >= 8) {
+                ctx.beginPath();
+                ctx.moveTo(144, 124);
+                ctx.lineTo(176, 110);
+                ctx.stroke();
+            }
+            if (mistakeCount >= 9) {
+                ctx.beginPath();
+                ctx.moveTo(144, 154);
+                ctx.lineTo(112, 180);
+                ctx.stroke();
+            }
+            if (mistakeCount >= 10) {
+                ctx.beginPath();
+                ctx.moveTo(144, 154);
+                ctx.lineTo(176, 180);
+                ctx.stroke();
+            }
+        }
+
+        function refreshUI() {
+            if (!currentWord) return;
+            
+            let display = '';
+            for (let ch of currentWord) {
+                if (guessedLetters.has(ch.toUpperCase())) {
+                    display += ch + ' ';
+                } else {
+                    display += '_ ';
+                }
+            }
+            wordDisplay.textContent = display.trim() || '_';
+
+            mistakesDisplay.textContent = `❌ ${mistakes} / 10`;
+            drawGallows(mistakes);
+
+            const wordGuessed = [...currentWord].every(ch => guessedLetters.has(ch.toUpperCase()));
+            if (wordGuessed && gameActive) {
+                gameActive = false;
+                infoMessage.textContent = '🎉 ПОБЕДА! Слово отгадано!';
+                restartBtn.classList.remove('hidden');
+            } else if (mistakes >= 10 && gameActive) {
+                gameActive = false;
+                infoMessage.textContent = `💀 Проигрыш. Загадано: ${currentWord}`;
+                restartBtn.classList.remove('hidden');
+            } else {
+                infoMessage.textContent = '';
+            }
+
+            document.querySelectorAll('.key-btn').forEach(btn => {
+                const letter = btn.dataset.letter;
+                if (guessedLetters.has(letter)) {
+                    btn.classList.add('used');
+                } else {
+                    btn.classList.remove('used');
+                }
+            });
+        }
+
+        function processLetter(letter) {
+            if (!gameActive || !dbInitialized || isLoading) return;
+            if (!letter || letter.length !== 1) return;
+            const upperLetter = letter.toUpperCase();
+            if (!/[А-ЯЁA-Z]/.test(upperLetter)) return;
+
+            if (guessedLetters.has(upperLetter)) return;
+
+            guessedLetters.add(upperLetter);
+
+            if (!currentWord.includes(upperLetter)) {
+                mistakes++;
+            }
+            refreshUI();
+        }
+
+        function startNewGame() {
+            if (!dbInitialized || isLoading) return;
+            
+            const categoryWords = wordsData[currentCategory];
+            if (!categoryWords || categoryWords.length === 0) {
+                wordDisplay.textContent = 'Нет слов в категории';
+                infoMessage.textContent = '⚠️ База данных пуста, перезагрузите страницу';
+                return;
+            }
+            
+            const randomIndex = Math.floor(Math.random() * categoryWords.length);
+            currentWord = categoryWords[randomIndex].toUpperCase();
+            guessedLetters.clear();
+            mistakes = 0;
+            gameActive = true;
+            restartBtn.classList.add('hidden');
+            infoMessage.textContent = '';
+            refreshUI();
+        }
+
+        function setCategory(cat) {
+            if (!dbInitialized || isLoading) return;
+            currentCategory = cat;
+            categoryButtons.forEach(btn => {
+                const btnCat = btn.dataset.cat;
+                if (btnCat === cat) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            startNewGame();
+        }
+
+        function buildKeyboard() {
+            const rows = [
+                ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х','Ъ'],
+                ['Ф','Ы','В','А','П','Р','О','Л','Д','Ж','Э'],
+                ['Я','Ч','С','М','И','Т','Ь','Б','Ю']
+            ];
+            keyboardDiv.innerHTML = '';
+            rows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'key-row';
+                row.forEach(letter => {
+                    const btn = document.createElement('button');
+                    btn.className = 'key-btn';
+                    btn.dataset.letter = letter;
+                    btn.textContent = letter;
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        processLetter(letter);
+                    });
+                    rowDiv.appendChild(btn);
+                });
+                keyboardDiv.appendChild(rowDiv);
+            });
+        }
+
+        function onPhysicalKey(e) {
+            if (!gameActive || !dbInitialized || isLoading) return;
+            const key = e.key;
+            if (key.length === 1 && /[а-яА-Яa-zA-ZёЁ]/.test(key)) {
+                e.preventDefault();
+                processLetter(key.toUpperCase());
+            }
+        }
+
+        async function initializeApp() {
+            buildKeyboard();
+            
+            categoryButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setCategory(btn.dataset.cat);
+                });
+            });
+
+            restartBtn.addEventListener('click', () => {
+                startNewGame();
+            });
+
+            window.addEventListener('keydown', onPhysicalKey);
+            
+            try {
+                await initDatabase();
+                await loadWordsFromDB();
+                dbInitialized = true;
+                isLoading = false;
+                
+                categoryButtons.forEach(btn => {
+                    btn.disabled = false;
+                });
+                
+                const hasWords = Object.values(wordsData).some(arr => arr.length > 0);
+                if (!hasWords) {
+                    infoMessage.textContent = '⚠️ База данных пуста, используйте резервные слова';
+                    wordsData = {
+                        tech: ['МОНИТОР', 'КЛАВИАТУРА', 'ПРОЦЕССОР', 'НАУШНИКИ', 'МИКРОФОН'],
+                        animals: ['КРОКОДИЛ', 'БЕГЕМОТ', 'НОСОРОГ', 'ЖИРАФ', 'СЛОН'],
+                        fruits: ['АПЕЛЬСИН', 'МАНДАРИН', 'АНАНАС', 'ГРАНАТ', 'КИВИ']
+                    };
+                }
+                
+                startNewGame();
+            } catch (error) {
+                console.error('Ошибка инициализации БД:', error);
+                infoMessage.textContent = '⚠️ Используются встроенные слова';
+                wordsData = {
+                    tech: ['МОНИТОР', 'КЛАВИАТУРА', 'ПРОЦЕССОР', 'НАУШНИКИ', 'МИКРОФОН'],
+                    animals: ['КРОКОДИЛ', 'БЕГЕМОТ', 'НОСОРОГ', 'ЖИРАФ', 'СЛОН'],
+                    fruits: ['АПЕЛЬСИН', 'МАНДАРИН', 'АНАНАС', 'ГРАНАТ', 'КИВИ']
+                };
+                dbInitialized = true;
+                isLoading = false;
+                categoryButtons.forEach(btn => {
+                    btn.disabled = false;
+                });
+                startNewGame();
+            }
+        }
+
+        categoryButtons.forEach(btn => {
+            btn.disabled = true;
+        });
+        
+        initializeApp();
+    })();
+</script>
+</body>
+</html>
